@@ -34,6 +34,12 @@ $ /path/to/android-ndk-r20b/build/ndk-build -j 8;
 $ ls -l libs/*
 ```
 
+if you are using linux/macos with docker and don't want to install ndk in the host, you can also
+
+```bash
+$ cd /path/to/bxxt; bash build.sh;
+```
+
 ## BASIC USAGE
 
 * unpack boot.img
