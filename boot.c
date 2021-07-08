@@ -222,7 +222,6 @@ static int bxxt_boot_img_base_check(bxxt_boot_t* b) {
 }
         length_check(page_size, == 0);
         length_check(kernel_size, == 0);
-        length_check(ramdisk_size, == 0);
 
         length_check(ramdisk_size, > 0x4000000);
         length_check(kernel_size, > 0x4000000);
@@ -624,8 +623,8 @@ int bxxt_boot_unpack_all(char* name, char* abspath) {
         bxxt_buffer_t* fs = bxxt_buffer_create_from_data(b->mm_ramdisk_ptr,
                                 b->ramdisk_size);
         mkdir(path, 0755);
-
-        bxxt_cpio_archive_in(fs, path);
+        if (b->ramdisk_size > 0)
+                bxxt_cpio_archive_in(fs, path);
         bxxt_buffer_free(fs);
 
         log1(4, "writing METADATA");
