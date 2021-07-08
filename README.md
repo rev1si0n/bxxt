@@ -55,6 +55,11 @@ $ bxxt boot -i boot.img -o out/
 ```bash
 $
 $ # there's may be some dt.dts-xx files, means as same as kernel.dts-xx
+$ #
+$ # there also may exist a file named extra.data, it's the data we cant
+$ # recognize or processed. this extra.data usually an android certificate
+$ # or avb or unknown dtb. we need to append it when you pack the boot.img.
+$ #
 $ ls /path/to/out
 -rw-rw-rw-    1 0        0              738 Mar 27 10:31 METADATA       # meta data
 -rw-------    1 0        0         39450632 Mar 27 10:31 kernel         # decompressed linux kernel
@@ -152,12 +157,12 @@ $ bxxt sepol -s 'create deltaforce' -l
 > all supported commands (-s)
 
 ```bash
-create aaaa
-permissive aaaa
-enforce aaaa
-allow aaaa bbbb:file *
+create aaaa # create a domain
+permissive aaaa # permissive a domain
+enforce aaaa # enforce a domain
+allow aaaa bbbb:file * # allow doamin aaaa's all operations to bbbb's file
 disallow aaaa bbbb:file *
-allow aaaa bbbb:file open
+allow aaaa bbbb:file open # only allow doamin aaaa's open operation to bbbb's file
 disallow aaaa bbbb:file open
 ```
 

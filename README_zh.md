@@ -1,46 +1,74 @@
-## BXXT
+## 这是什么
 
-> 前言: 注意，刷机有风险，请确保你有足够的经验保证手机不会变黑砖。
-> 如果遇到了非预期的结果或者BUG或者无法启动，请提交ISSUE并附上 boot
+bxxt 是作者为了掩盖自己能力不足不能够聪明的使用轮子而新建的一个轮子。这个轮子专门设计为运行在安卓设备上，
+你可以在任何手机或者安卓模拟器上使用它。（注意，这个东西不能在宿主机上运行）
 
-bxxt 是一个在研究安卓物理机群控过程中搞出来的一个自用小工具。
-注意：这个工具只能在模拟器及实际机器的环境运行，它`并不能`运行在你的 linux 主机或者电脑上。
+目前的功能:
 
-它目前在安卓 6.0 - 安卓 10 部分设备上经过了测试。所有功能都是基于我本人的需求，所以并不确保它适合你。目前可以处理 boot.img 的解包打包，以及 selinux 临时及永久修改。
+* 可以完美的运行在 twrp 中，这意味着可以在刷机包中使用它。
 
-你不需要网上大多数文章中那些繁琐的步骤以及脚本。对于解包(unpack)boot.img，程序会自动为你解压安卓的linux kernel，ramdisk，以及反编译相关 dtb 分区，zimage-dtb 中的设备树。并在打包(pack)boot.img时自动处理相关修改。除此之外，还添加了部分 android selinux 规则修改的支持。
+* 解包，打包 boot.img (或许也能用在 recovery.img 上)
 
-> 首先，请确保下载了当前目录下的 `bxxt` 并且 push 到手机上且加上了可执行权限
+> 它会解包目前boot.img最可能需要修改的部分，包括，boot.img 中的 ramdisk，
+> kernel 以及 dt 区内的设备树，以及一个解压好的 kernel，为你省去可能出现操作失误的麻烦。
 
-## BOOT.IMG (RECOVERY.IMG)
+* 编辑，注入 sepolicy
 
-> 同样支持 recovery.img
+* 简单的 patch 二进制文件
 
-事实上，你只需要这一条命令
+不幸的是，这个工具可能只支持官方的镜像格式，且目前只支持安卓 6.0 - 10，
+由于部分安卓11设备仍使用 v2 镜像所以这个工具可能适用于部分安卓11的镜像。
+
+关于我的编码风格表示抱歉，由于缩进等，它可能不太容易阅读。
+
+## 如何编译
+
+非常简单，你只需要确保你下载了 android-ndk-r20b
+
 ```bash
-bxxt boot -i boot.img -o /path/to/output
+$ cd /path/to/bxxt;
+$ /path/to/android-ndk-r20b/build/ndk-build -j 8;
+...
+$ ls -l libs/*
 ```
-即可把 boot.img 中的大部分东西，变成你想要的样子（它会连内核也帮你解压好）。
 
-同样，打包也非常简单
+如果你的机器系统是 linux 或者 mac 并且运行着 docker，你也可以
+
 ```bash
-bxxt boot -i /path/to/output -o boot_new.img
+$ cd /path/to/bxxt; bash build.sh;
 ```
 
-下面，来介绍解包输出的文件及结构。
+## 如何使用
+
+* 解包 boot.img
+
+```bash
+$ # 首先创建一个空目录用于存放解包后的文件
+$ mkdir out
+$ bxxt boot -i boot.img -o out/
+```
+
+* 解包的 boot.img 输出结构
+
 ```bash
 $
-$ ls /path/to/output
--rw-rw-rw-    1 0        0              738 Mar 27 10:31 METADATA       # 元数据，在此编辑 cmdline 类参数
--rw-------    1 0        0         39450632 Mar 27 10:31 kernel         # 解压好的 linux 内核
--rw-rw-rw-    1 0        0           624384 Mar 27 10:31 kernel.dts-00  # 设备树（文本文件，可以编辑）
+$ # 这里可能会有 dt.dts-xx 文件（测试镜像里没有所以解包的演示也就没有）, 与 kernel.dts-xx 的意义基本相同，你也可以编辑
+$ #
+$ # 可能会产生一个文件叫做 extra.data，这是 bxxt 无法识别或者处理的数据
+$ # 这个 extra.data 可能只是一个安卓证书，或者 AVB 或者非常规结构的 DTB，bxxt 会在后期将其追加到镜像。
+$ # 提示：(如果这里面存的是 DTB或者AVB，你可能需要酌情编辑它来绕过某些AVB或者什么)
+$ #
+$ ls /path/to/out
+-rw-rw-rw-    1 0        0              738 Mar 27 10:31 METADATA       # 元数据（修改命令行等）
+-rw-------    1 0        0         39450632 Mar 27 10:31 kernel         # 已解压的 kernel
+-rw-rw-rw-    1 0        0           624384 Mar 27 10:31 kernel.dts-00  # 设备树，文本，可编辑
 -rw-rw-rw-    1 0        0           633469 Mar 27 10:31 kernel.dts-01
 -rw-rw-rw-    1 0        0           624449 Mar 27 10:31 kernel.dts-02
-drwxr-xr-x    9 0        0             4096 Mar 27 10:31 ramdisk        # ramdisk 文件夹
--rw-r--r--    1 0        0                0 Mar 26 18:02 recovery_dtbo  # ...
--rw-r--r--    1 0        0                0 Mar 26 18:02 second         # ...
+drwxr-xr-x    9 0        0             4096 Mar 27 10:31 ramdisk        # randisk
+-rw-r--r--    1 0        0                0 Mar 26 18:02 recovery_dtbo  # recovery_dtbo
+-rw-r--r--    1 0        0                0 Mar 26 18:02 second         # second
 $
-$ ls /path/to/output/ramdisk
+$ ls /path/to/out/ramdisk
 drwxr-xr-x    2 0        0             4096 Jan  1  1970 apex
 drwxr-xr-x    2 0        0             4096 Jan  1  1970 debug_ramdisk
 drwxr-xr-x    2 0        0             4096 Jan  1  1970 dev
@@ -50,28 +78,30 @@ drwxr-xr-x    2 0        0             4096 Jan  1  1970 proc
 drwxr-xr-x    2 0        0             4096 Jan  1  1970 sys
 -rw-r--r--    1 0        0              524 Jan  1  1970 verity_key
 $
-$ cat /path/to/output/METADATA
-bxxt.kernel_addr=8000                 # 可编辑
-bxxt.ramdisk_addr=1000000             # 可编辑
-bxxt.second_addr=f00000               # 可编辑
-bxxt.tags_addr=100                    # 可编辑
-bxxt.dtb_addr=0                       # 可编辑
-bxxt.recovery_dtbo_offset=0           # 可编辑
-bxxt.name=                            # 可编辑
-bxxt.cmdline=androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 # 可编辑
-bxxt.extra_cmdline=                   # 可编辑
-bxxt.kernel_compression=1             # ! 不可编辑
-bxxt.header_version=0                 # ! 不可编辑
-bxxt.os_version=14000144              # 可编辑
-bxxt.header_size=0                    # ! 不可编辑
-bxxt.page_size=1000                   # 可编辑
-bxxt.kernel_size=14890c7              # ! 不可编辑
-bxxt.ramdisk_size=c5302               # ! 不可编辑
-bxxt.second_size=0                    # ! 不可编辑
-bxxt.recovery_dtbo_size=0             # ! 不可编辑
-bxxt.dtb_size=0                       # ! 不可编辑
+$ # 你可以编辑 METADATA 中的任意行除了下面标记为 `不要编辑` 的这些
+$ cat /path/to/out/METADATA
+bxxt.kernel_addr=8000
+bxxt.ramdisk_addr=1000000
+bxxt.second_addr=f00000
+bxxt.tags_addr=100
+bxxt.dtb_addr=0
+bxxt.recovery_dtbo_offset=0
+bxxt.name=
+bxxt.cmdline=androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37
+bxxt.extra_cmdline=
+bxxt.kernel_compression=1             # ! 不要编辑
+bxxt.header_version=0                 # ! 不要编辑
+bxxt.os_version=14000144
+bxxt.header_size=0                    # ! 不要编辑
+bxxt.page_size=1000
+bxxt.kernel_size=14890c7              # ! 不要编辑
+bxxt.ramdisk_size=c5302               # ! 不要编辑
+bxxt.second_size=0                    # ! 不要编辑
+bxxt.recovery_dtbo_size=0             # ! 不要编辑
+bxxt.dtb_size=0                       # ! 不要编辑
 $
-$ head /path/to/output/kernel.dts-00
+$ # 看一下解包好的 dts 文件，你可以酌情编辑
+$ head /path/to/out/kernel.dts-00
 /dts-v1/;
 
 / {
@@ -80,37 +110,60 @@ $ head /path/to/output/kernel.dts-00
         model = "Qualcomm Technologies, Inc. MSM 8998 v2.1 MTP";
         compatible = "qcom,msm8998-mtp", "qcom,msm8998", "qcom,mtp";
 $
+```
+
+* 重新打包 boot.img
+
+```bash
+$ bxxt -i out/ -o boot_modified.img
+```
+
+* patch 二进制文件
+
+```bash
+$ # @ 代表 AT, @偏移:大小=字节序列, 这个 `大小` 最大是 8，也就是说一次只能改 8 个字节
+$ # 这个字节序列代表你在任何十六进制编辑器中`看到的顺序`
+$ # 如果十六进制编辑器显示为 00000000: 0A 0B 0C 0D 11 22 33 44
+$ # 你想把 0A 0B 改为 CC EE，只需要
+$ bxxt patch @00000000:2=ccee /path/to/binary/file
+$ # 或者你想把这一整个 `0A 0B 0C 0D 11 22 33 44` 改为 `01 02 03 04 05 06 07 08`
+$ # 只需要
+$ bxxt patch @00000000:8=0102030405060708 /path/to/binary/file
 $
+$ # 禁用 vbmeta 校验的例子
+$ bxxt patch @00000078:4=00000002 /dev/block/by-name/vbmeta_a
 ```
 
-## SELINUX
+* sepolicy 编辑，注入
 
-> 目前仅支持下列语句
+注意使用 `单引号` 把 `-s` 参数包裹起来。不建议直接 setenforce，特事特办，需要什么权限给什么权限。
+
+> 编辑 sepolicy 文件
 
 ```bash
-# 注意，这里面的 file class 只是 demo，你可以替换为别的 class
-create xxxx                        # 新增一个 type
-permissive xxxx                    # 设置 type 为 permissive
-enforce xxxx                       # 设置 type 为 enforcing
-allow xxxx bbbb:file *             # 允许 xxxx 对 bbbb 文件的所有操作
-disallow xxxx bbbb:file *          # 禁止 xxxx 对 bbbb 文件的所有操作
-allow xxxx cccc:file open          # 运行 xxxx 对 cccc 文件的 open 操作（注意你没给 write,read 这些这句其实没什么实际意义，只作为例子）
-disallow xxxx cccc:file open       # 禁止 xxxx 对 cccc 文件的 open 操作
+$ # 输入 (-i) 以及输出 (-o) 文件可以是相同的（如果你不想创建一个中间文件的话）
+$ bxxt sepol -s 'create deltaforce' -i /path/to/sepolicy -o /path/to/out/sepolicy
 ```
 
-> 即时模式（运行时，重启失效）
+> 即时模式 (在运行的安卓系统中即时生效)
+
 ```bash
-# -l 意为 `load`，-s 意为 `语句`（注意使用单引号）
-$ bxxt sepol -s 'create my_type' -l
+$ # 即时模式样例
+$ bxxt sepol -s 'create deltaforce' -l
 ```
 
-> 永久模式（需要指定文件）
+> 所有支持的语句 (-s)
+
 ```bash
-# 设置常量（sepolicy 路径)
-$ export SEPOLICY=/sepolicy
-# 永久设置 my_type 为 permissive
-# -i 意为 `输入文件` -o 意为 `输出文件`
-$ bxxt sepol -i $SEPOLICY -s 'permissive my_type' -o $SEPOLICY
+create aaaa # 新增一个域
+permissive aaaa # permissive 一个域
+enforce aaaa # enforce 一个域
+allow aaaa bbbb:file * # 允许域 aaaa 对 域 bbbb 的文件的所有操作
+disallow aaaa bbbb:file * # 反之
+allow aaaa bbbb:file open # 仅允许域 aaaa 对 域 bbbb 的文件的 open 操作
+disallow aaaa bbbb:file open # 反之
 ```
 
-OK，好了，知道了这些以后，如果你对这方面有所了解的话，应该就知道做什么了。
+## 版权
+
+查看根目录的 `COPYING` 文件
