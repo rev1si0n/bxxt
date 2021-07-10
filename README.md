@@ -18,6 +18,12 @@ feature:
 
 * patch binary file
 
+* set android readonly property (ro.x) , global effect (apps/commands), see usage below for details
+
+
+most tools can run without root, but run-time sepolicy inject and set
+readonly property needs you run as root.
+
 the bad news is it only support android 6.0 - 10.0,
 may be support android 11 (depends on the boot.img version).
 
@@ -165,6 +171,25 @@ disallow aaaa bbbb:file *
 allow aaaa bbbb:file open # only allow doamin aaaa's open operation to bbbb's file
 disallow aaaa bbbb:file open
 ```
+
+* set readonly property (without reboot)
+
+```bash
+$ bxxt setprop ro.build.fingerprint whathell
+```
+
+notice: set `ro.debuggable` to `1` will not get the result you want
+cause android already initialized this attribute
+to a const variable at the boot time, if you want all apps are debuggable,
+you should use:
+
+```bash
+$ bxxt setdebuggable 1
+$ # bxxt setdebuggable 0
+```
+
+this will let your device a `HOT-REBOOT`, your device will behave like a normal reboot but
+only the android service over the linux kernel.
 
 ## LICENSE
 

@@ -16,6 +16,10 @@ bxxt 是作者为了掩盖自己能力不足不能够聪明的使用轮子而新
 
 * 简单的 patch 二进制文件
 
+* 设置安卓只读属性，无需重启，全局生效（APP系统调用、命令行），请看下列使用方法及注意事项
+
+大部分工具可以在无 root 的情况下正常运行，但是实时selinux注入以及设置只读属性需要你使用root身份运行。
+
 不幸的是，这个工具可能只支持官方的镜像格式，且目前只支持安卓 6.0 - 10，
 由于部分安卓11设备仍使用 v2 镜像所以这个工具可能适用于部分安卓11的镜像。
 
@@ -163,6 +167,22 @@ disallow aaaa bbbb:file * # 反之
 allow aaaa bbbb:file open # 仅允许域 aaaa 对 域 bbbb 的文件的 open 操作
 disallow aaaa bbbb:file open # 反之
 ```
+
+* 设置只读属性 （无需重启，全局生效）
+
+```bash
+$ bxxt setprop ro.build.fingerprint whathell
+```
+
+特别注意：设置 `ro.debuggable` 为 `1` 并不会得到你想要的结果，因为安卓已经在启动时读取并赋值了这个变量，
+所以这里的更改相对来说是无效的！如果你想养你的设备变为可调试状态，你应该使用
+
+```bash
+$ bxxt setdebuggable 1
+$ # bxxt setdebuggable 0
+```
+
+但是注意！这会使你的设备进行热重启，你的设备会表现出重启的状态！
 
 ## 版权
 

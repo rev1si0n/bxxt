@@ -30,6 +30,10 @@ int main(int argc, char **argv) {
                 return boot_main(argc - 1, argv + 1);
         else if (argc > 2 && strcmp(argv[1], "sepol") == 0)
                 return sepol_main(argc - 1, argv + 1);
+        else if (argc == 3 && strcmp(argv[1], "setdebuggable") == 0)
+                return setdebuggable_main(argc - 1, argv + 1);
+        else if (argc == 4 && strcmp(argv[1], "setprop") == 0)
+                return setprop_main(argc - 1, argv + 1);
         else if (argc > 2 && strcmp(argv[1], "patch") == 0)
                 return patch_main(argc - 1, argv + 1);
         return 1;

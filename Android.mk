@@ -215,7 +215,8 @@ bxxt_src_files := \
             bxxt.c \
             patch.c \
             sha1.c \
-            dtcc.c
+            dtcc.c \
+            prop.c
 
 
 include $(CLEAR_VARS)
@@ -258,7 +259,8 @@ LOCAL_MODULE        := bxxt
 LOCAL_C_INCLUDES    := $(LOCAL_PATH)
 LOCAL_SRC_FILES     := $(bxxt_src_files)
 # if you want disable all bxxt outputs just set BXXT_LOGLEVEL to -999
-LOCAL_CFLAGS        := -DBXXT_LOGLEVEL=255 -Wno-incompatible-pointer-types -Wno-pointer-sign
+LOCAL_CFLAGS        := -DBXXT_LOGLEVEL=255 -Wno-incompatible-pointer-types -Wno-pointer-sign \
+                       -Wno-implicit-function-declaration
 LOCAL_STATIC_LIBRARIES  := archive_static sepol_static dtc_static z_static
 LOCAL_LDFLAGS       := -static
 include $(BUILD_EXECUTABLE)
