@@ -2,6 +2,9 @@
 
 [简体中文介绍](README_zh.md)
 
+prebuilt all platform binaries download from here [https://github.com/rev1si0n/bxxt-binaries](https://github.com/rev1si0n/bxxt-binaries)
+(idk how to use github auto release)
+
 bxxt is another wheel designed for noob author's needs.
 now it can only run in the android host, it means you can only
 run this tool in the phone or emulator (not your computer)

@@ -1,5 +1,8 @@
 ## 这是什么
 
+编译好的全平台可执行文件在此下载 [https://github.com/rev1si0n/bxxt-binaries](https://github.com/rev1si0n/bxxt-binaries)
+(我不太会使用自动 release)
+
 bxxt 是作者为了掩盖自己能力不足不能够聪明的使用轮子而新建的一个轮子。这个轮子专门设计为运行在安卓设备上，
 你可以在任何手机或者安卓模拟器上使用它。（注意，这个东西不能在宿主机上运行）
 
