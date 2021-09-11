@@ -122,7 +122,7 @@ $
 * 重新打包 boot.img
 
 ```bash
-$ bxxt -i out/ -o boot_modified.img
+$ bxxt boot -i out/ -o boot_modified.img
 ```
 
 * patch 二进制文件
