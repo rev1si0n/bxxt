@@ -120,6 +120,11 @@ $
 ```
 
 * 重新打包 boot.img
+> 注意，某些情况下生成的 boot_modified.img 大小可能超过你实际 boot 分区的大小
+> 如果在你刷入时 boot_modified.img 出现 size too large 这种错误,
+> 尝试增加一个命令行选项 -e skip-unknown-data
+> 如 `bxxt -i out/ -o boot_modified.img -e skip-unknown-data`
+> 重新生成镜像并刷入
 
 ```bash
 $ bxxt boot -i out/ -o boot_modified.img

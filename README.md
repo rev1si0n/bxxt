@@ -125,6 +125,11 @@ $
 
 * pack boot.img
 
+> NOTICE: this may generate a image that size exceeds your boot partition is.
+> if size too large error occurs when you flash the boot_modified.img,
+> try add extra option -e skip-unknown-data like `bxxt -i out/ -o boot_modified.img -e skip-unknown-data`
+> regenrate the image and flash it
+
 ```bash
 $ bxxt -i out/ -o boot_modified.img
 ```

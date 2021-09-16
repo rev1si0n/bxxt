@@ -27,6 +27,7 @@
 #include "dtcc.h"
 
 static int force_no_compat_check = false;
+static int skip_unknown_data = false;
 
 static bxxt_boot_t* bxxt_boot_new() {
         bxxt_boot_t* b;
@@ -456,15 +457,22 @@ static int bxxt_boot_init1(bxxt_boot_t* b, void* ptr, size_t size,
 
         int32_t ts = b->pad_size -1;
         while (ts && ((uint8_t*)b->mm_pad_ptr)[ts] == 0x0) ts -=1;
-        b->pad_size = ts;
+        if (b->pad_size != 0)
+                b->pad_size = ts;
 
         log1(8,
                 "trim (without padding zero bytes) unknown data "\
-                "to size %x", ts);
+                "to size %x", b->pad_size);
         if (b->pad_size > 0)
                 log1(-2, "NOTICE: parse complete, image size %zx "
                                 "but still %x bytes data left",
                                         size, b->pad_size)
+        if (b->pad_size > 0)
+                log1(-2, "this may produce an image that exceeds the size of your \n"
+                         "         actual boot partition.\n"
+                         "         if you sure the extra data is useless,\n"
+                         "         add extra option `-e skip-unknown-data`\n"
+                         "         when you re-pack the image")
 
         if (bxxt_boot_img_base_check(b) == BXXT_FAILED)
                 goto error;
@@ -769,7 +777,8 @@ int bxxt_boot_pack_all(char* abspath, char* name) {
         // add unknown padding data
         sprintf(path, "%s/extra.data", abspath);
 
-        if (stat(path, &st) == 0 && st.st_size > 0) {
+        if (!skip_unknown_data
+                && stat(path, &st) == 0 && st.st_size > 0) {
         tmp = bxxt_boot_read_from(path);
         log1(8, "adding unknown padding data, size %zx", tmp->size);
 
@@ -807,8 +816,11 @@ int boot_main(int argc, char **argv) {
         struct stat st;
         char i_path[PATH_MAX], o_path[PATH_MAX];
 
-        for (int opt = 0; (opt = getopt(argc, argv, "i:o:n")) != -1;) {
+        for (int opt = 0; (opt = getopt(argc, argv, "i:o:e:n")) != -1;) {
         switch (opt) {
+        case 'e':
+                  skip_unknown_data = !strcmp(optarg, "skip-unknown-data");
+                  break;
         case 'n': force_no_compat_check = true;
                   break;
         case 'i': strcpy(i_path, optarg);
