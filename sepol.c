@@ -271,7 +271,8 @@ static int bxxt_sepol_execute_stmt(bxxt_sepoldb_t* bpb, char* stmt) {
         else if (sscanf(stmt, "enforce %[1-9,a-z,_,-];", src) == 1)
                 r = bxxt_sepol_set_permissive(bpb, src, false);
         else if (sscanf(stmt, "create %[1-9,a-z,_,-];", src) == 1)
-                r = bxxt_sepol_create_domain(bpb, src);
+                //bxxt_sepol_create_domain returns an id not status
+                r = bxxt_sepol_create_domain(bpb, src) < 0;
         else
                 return -1;
         return r;
