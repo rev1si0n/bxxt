@@ -109,7 +109,8 @@ static int bxxt_cpio_archive_read_entry(bxxt_cpio_t* cp, struct archive_entry *e
 	la_int64_t offset;
 	size_t size;
 	const void *buff;
-
+        if (!archive_entry_pathname(e))
+                return ARCHIVE_FAILED;
         sprintf(fpath, "%s/%s", cp->path, archive_entry_pathname(e));
         log1(8, "archive > mode=%03o %s", archive_entry_mode(e) & 0x1ff,
                                         archive_entry_pathname(e))
@@ -210,9 +211,9 @@ int bxxt_cpio_archive_in(bxxt_buffer_t* bb, const char* path) {
         log1(5, "archive > working on %s", cp->path);
 
 	for (;(r = archive_read_next_header(cp->r, &e)) != ARCHIVE_EOF;) {
-        bxxt_cpio_archive_read_entry(cp, e);
+        if (bxxt_cpio_archive_read_entry(cp, e) != ARCHIVE_OK)
+                break;
         }
-
         bxxt_cpio_archive_free(cp);
         return ARCHIVE_OK;
 }
