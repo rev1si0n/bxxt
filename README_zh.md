@@ -107,6 +107,13 @@ bxxt.second_size=0                    # ! 不要编辑
 bxxt.recovery_dtbo_size=0             # ! 不要编辑
 bxxt.dtb_size=0                       # ! 不要编辑
 $
+$ # 我自己从源码编译了安卓的内核 (Image/Image.gz/Image.gz-dtb)
+$ # 我该如何替换掉 boot.img 中的这个内核？
+$ # 回答 (优先级从高到低):
+$ # 1. 如果你的内核有 Image.gz-dtb 文件, 用其替换掉 kernel 文件然后编辑METADATA将kernel_compression置为0，最后删掉所有 kernel.dts* 文件。
+$ # 2. 如果你的内核有 Image.gz 文件, 用其替换掉 kernel 文件然后编辑METADATA将kernel_compression置为0。
+$ # 3. 如果你的内核有 Image 文件, 直接使用其替换掉 kernel 文件即可。
+$
 $ # 看一下解包好的 dts 文件，你可以酌情编辑
 $ head /path/to/out/kernel.dts-00
 /dts-v1/;

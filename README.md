@@ -111,6 +111,13 @@ bxxt.second_size=0                    # ! DO NOT MODIFY
 bxxt.recovery_dtbo_size=0             # ! DO NOT MODIFY
 bxxt.dtb_size=0                       # ! DO NOT MODIFY
 $
+$ # i have compiled kernel from source myself (Image/Image.gz/Image.gz-dtb)
+$ # how do i relpace it?
+$ # answer (priority high to low):
+$ # 1. if you have an Image.gz-dtb file, replace kernel with it then edit METADATA set kernel_compression to 0 and delete all files named kernel.dts*
+$ # 2. if you have an Image.gz file, then replace kernel file with it and edit METADATA, set kernel_compression to 0
+$ # 3. if you have an Image file, replace kernel file with it directly.
+$
 $ # decompiled dts file (if exist), you can also modify it
 $ head /path/to/out/kernel.dts-00
 /dts-v1/;
