@@ -79,6 +79,14 @@ int bxxt_prop_set(char* name, char* value) {
                 log1(-1, "failed open dev %s", bm.file);
         return 1;
         }
+        // value lenght in serial (head vlbits bits)
+        int vlbits = ((sizeof(p->serial)*8) - 24);
+        unsigned serial = (strlen(value) << 24) | ((p->serial << vlbits) >> vlbits);
+
+        // serial is at offset 0 of struct
+        lseek64(fd, offset + 0,
+                                SEEK_SET);
+        r = write(fd, &serial, sizeof(p->serial));
 
         lseek64(fd, offset +((void*)(p->value) - (void*)p),
                                 SEEK_SET);
